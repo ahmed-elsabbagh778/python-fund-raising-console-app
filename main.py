@@ -1,3 +1,5 @@
+import pandas as pd
+import os
 
 
 # User class to handle registration, login, and project management
@@ -73,10 +75,19 @@ class User:
         pass
 
     def show_projects(self):
-    #دي هتمسك الليست وتعرضها
-    # لاحظ ان  الليست بتحتوي اوبجكتس من النوع بروجكت  ..
-    # الاحسن نعمل فنكشن جوا البروجكت اسمها show ونلوب ونستخدمها لكل واحد منهم
 
+
+
+            #دي هتمسك الليست وتعرضها
+            # لاحظ ان  الليست بتحتوي اوبجكتس من النوع بروجكت  ..
+            # الاحسن نعمل فنكشن جوا البروجكت اسمها show ونلوب ونستخدمها لكل واحد منهم
+
+            # ومعلش قبل اي حاجة حط السطرين دول
+        print(
+            f"{'ID'.ljust(4)} | {'Title'.ljust(15)} | {'Details'.ljust(30)} | {'Target Amount'.ljust(15)} | {'Start Date'.ljust(10)} | {'End Date'.ljust(10)}")
+        print("-" * 100)
+
+        
         pass
 
     def delete_project(self):
@@ -125,24 +136,87 @@ class Project:
         # دي هتجيب id بس الاول وبعدين تحط البيانات كلها بقى بالid بكله في الفايل
         # يعني قصدي هتعمل self.__id = id عشان هنحتاجه طبعا
         # وبعدين تحط كل البيانات دي كبروجكت في فايل البروجكتس مرة واحدة
-        pass
+
+
+        try:
+            self.__id = Project.__generate_project_id()
+            new_project = {
+                'id': self.__id,
+                'title': self.__title,
+                'details': self.__details,
+                'target_amount': self.__target_amount,
+                'start_date': self.__start_date,
+                'end_date': self.__end_date,
+                'creator_id': self.__creator_id
+            }
+
+            file_path = 'projects.csv'
+
+            if os.path.exists(file_path):
+                df = pd.read_csv(file_path)
+                df = pd.concat([df, pd.DataFrame([new_project])], ignore_index=True)
+            else:
+                df = pd.DataFrame([new_project])
+
+            df.to_csv(file_path, index=False)
+
+            print("Project inserted successfully")
+
+        except Exception as e:
+            print(f"Error inserting project: {e}")
 
     @staticmethod
     def __generate_project_id():
     #خلي جزء جلب اخر id + 1 دا هنا
     # واستخدمه في الفنكشن اللي فوق .. نضافة كود مش اكتر
-        pass
+
+        file_path = 'projects.csv'
+        if os.path.exists(file_path):
+            df = pd.read_csv(file_path)
+            if not df.empty:
+                return int(df.tail(1)['id'].iloc[0]) + 1
+        return 1
+
 
     def delete(self):
         # هنا هتاخد الid وتروح تشيل الريكورد بتاعه من الفايل بس وخلاص يا احمد يا ابراهيم
         # .. لقطة حلوة انك تdestruct الاوجكت بعدها
         pass
 
+    @staticmethod
+    def __split_string(string, size):
+        list_of_splits = []
+        while(True):
+            if len(string)>size:
+                list_of_splits.append(string[:size])
+                string = string[size:]
+            else:
+                list_of_splits.append(string)
+                break
+
+        return list_of_splits
+
 
 
     def show(self):
-        # شو
-        pass
+        title_parts = Project.__split_string(str(self.__title), 15)
+        details_parts = Project.__split_string(str(self.__details), 30)
+        target_parts = Project.__split_string(str(self.__target_amount), 15)
+        start_parts = Project.__split_string(str(self.__start_date), 10)
+        end_parts = Project.__split_string(str(self.__end_date), 10)
+        id_parts = Project.__split_string(str(self.__id), 4)
+
+        print(title_parts,details_parts)
+        max_lines = max(len(title_parts), len(details_parts), len(target_parts), len(start_parts), len(end_parts))
+
+        for i in range(max_lines):
+            print(f"{(id_parts[i] if i < len(id_parts) else '').ljust(4)} | "
+                  f"{(title_parts[i] if i < len(title_parts) else '').ljust(15)} | "
+                  f"{(details_parts[i] if i < len(details_parts) else '').ljust(30)} | "
+                  f"{(target_parts[i] if i < len(target_parts) else '').ljust(15)} | "
+                  f"{(start_parts[i] if i < len(start_parts) else '').ljust(10)} | "
+                  f"{(end_parts[i] if i < len(end_parts) else '').ljust(10)}")
+
 
 
 
@@ -153,11 +227,12 @@ class Project:
 
 
 # Main function to run the console app
-def main():
+if __name__ == "__main__":
     #هنا انت هتساله register ولا login
     # على حسب اللي هيختاره هتشغلله الفنكشن .. الاتنين بيرجعوا اوبجكت يوزر
     # فمثلا
     # user = login()
     # بعد كدا هتساله بقى على باقي الخيارات .. فمثلا اختار ديليت بروجكت
     # user.delete_project()
+
     pass
