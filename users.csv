@@ -1,1 +1,2 @@
-id,first_name,last_name,email,password,phone
+id,first_name,last_name,email,password,phone,username
+1,ahmed,elsabbagh,ahmedelsabbagh@gmail.com,As123456,+201067465708,ahmedelsabbagh

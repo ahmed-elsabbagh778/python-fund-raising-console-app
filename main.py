@@ -1,42 +1,106 @@
 import pandas as pd
 import os
+import re
 
 
-# User class to handle registration, login, and project management
 class User:
-    def __init__(self,id, first_name, last_name, email, password, phone):
+    def __init__(self, id, first_name, last_name, username, email, password, phone):
         self.__id = id
         self.__first_name = first_name
         self.__last_name = last_name
+        self.__username = username
         self.__email = email
         self.__password = password
         self.__phone = phone
         self.__projects = []
 
-        #السلام عليكم .. كل فنكشن في الكلاس دا  عبارة عن خيارات القائمة اللي هتظهر اول ما تشغل البرنامج ..
-        # عايزك تروح تبص بس على اساميهم وتيجي هنا تاني .. بس تاني فنكشن دي مش خيار ها ***
-        #   في الاول المستخدم هيختار بس register ولا login وبعدها تظهرله باقي الاختيارات
-        # كل اختيار بتختاره المفروض انه هيطلب منك تدخلله حاجات معينة وكدا ..يعني مثلا الregistration هيطلب منك الاسم وا وا ..
-        # فانت بتـprompt اليوزر انه يدخل الحاجة الفلانية وتعمل عليها validation وكدا
-
     @staticmethod
     def register():
 
-        # الفنكشن دي اللي هتشتغل لما المستخدم يختار register  .. هي هتقعد تاخد منه المدخلات واحدة واحدة وتتشيك صحتها بلووب وكدا
-        # الفنكشن دي static method فكأنها اشبه بميثود متعرفة في الهوا .. فرق ان احنا لما هنستدعيها هنقول User.register() بس
-        # (وبالمرة وانت بتتشيك صحة كل انبوت ..تشيك لو الانبوت عبارة عن كلمة EXIT مثلا يخرج خلاص يريترن..هتبقى قايل للمستخدم على الموضوع دا يعني .. انه لو دخل EXIT يبقى عايز يكنسل)
-        # لو خلاص كل الانبوتس تمام ..  تسجل البيانات دي كيوزر في ملف اليوزرز
-        # فمبدئيا هتعمل id لليوزر
-        # .. فلازم تشوف الفايل وتشوف اخر id وتزود عليه 1 وكدا وبعدين تسجل النيو يوزر دا في الملف .. ثم تاخد بقى البيانات دي كلها كدا بالid وتعمل بيها اوبجكت من النوع يوزر وتريترنه.. دي الطريقة اللي في دماغي يعني
+        while True:
+            inputFirstName = input("Enter your first name: ")
+            if inputFirstName.lower() == "exit":
+                print('Registration Cancelled')
+                return
+            if not re.match(r'^[a-zA-Z]+$', inputFirstName):
+                print("Invalid name. Only letters are allowed.")
+                continue  
+            else:   
+                break
+            
+        while True:
+            inputLastName = input("Enter your last name: ")
+            if inputLastName.lower() == "exit":
+                print('Registration Cancelled')
+                return
+            if not re.match(r'^[a-zA-Z]+$', inputLastName):
+                print("Invalid name. Only letters are allowed.")
+                continue  
+            else:   
+                break
+
+        while True:
+            inputUsername = input("Enter your username: ")
+            if inputUsername.lower() == "exit":
+                print('Registration Cancelled')
+                return
+            if not re.match(r'^[a-zA-Z]+[0-9]*$', inputUsername):
+                print("Invalid username. Only letters and numbers are allowed.")
+                continue  
+            else:   
+                break
+
+        while True:
+            inputEmail = input("Enter your email: ")
+            if inputEmail.lower() == "exit":
+                print('Registration Cancelled')
+                return
+            if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', inputEmail):
+                print("Invalid email.")
+                continue  
+            else:   
+                break
+
+        while True:
+            inputPassword = input("Enter your password: ")
+            if inputPassword.lower() == "exit":
+                print('Registration Cancelled')
+                return
+            if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$', inputPassword):
+                print("Invalid password. Password must be at least 8 characters long and contain at least one letter and one number.")
+                continue  
+            else:   
+                break
+
+        while True:
+            inputConfirmPassword = input("Confirm your password: ")
+            if inputConfirmPassword.lower() == "exit":
+                print('Registration Cancelled')
+                return
+            if inputPassword != inputConfirmPassword:
+                print("Passwords do not match.")
+                continue  
+            else:   
+                break
+
+        while True:
+            inputPhone = input("Enter your phone number: ")
+            if inputPhone.lower() == "exit":
+                print('Registration Cancelled')
+                return
+            if not re.match(r'^\+201[0125][0-9]{8}$', inputPhone):
+                print('Invalid Phone')
+                continue  
+            else:   
+                break
+        
+        id = User.__generate_user_id()
+
+        return User(id, inputFirstName, inputLastName, inputUsername, inputEmail, inputPassword, inputPhone)
 
 
-
-
-
-        pass
 
     @staticmethod
-    # (((((((دي مش خيار دي ها))))))
     def __generate_user_id():
         file_path = 'users.csv'
         if os.path.exists(file_path):
@@ -44,19 +108,55 @@ class User:
             if not df.empty:
                 return int(df.tail(1)['id'].iloc[0]) + 1
         return 1
+    
+    def save_to_file(self):
+        file_path = 'users.csv'
+
+        user_data = {
+            'id': [self.__id],
+            'first_name': [self.__first_name],
+            'last_name': [self.__last_name],
+            'username': [self.__username],
+            'email': [self.__email],
+            'password': [self.__password],
+            'phone': [self.__phone]
+        }
+
+        df_new = pd.DataFrame(user_data)
+
+        if os.path.exists(file_path):
+            df_existing = pd.read_csv(file_path)
+            df_combined = pd.concat([df_existing, df_new], ignore_index=True)
+            df_combined.to_csv(file_path, index=False)
+        else:
+            df_new.to_csv(file_path, index=False)
+
+        print("User registered successfully!")
 
     @staticmethod
     def login():
-        # .دي برده نفس الكلام .. الفرق انها بتبحث في فايل اليوزرز.. ولو لقته بتعمل اوبجكت ببيانته وترجع الاوبجكت .. خلي بالك ان بياناته دي هتشمل بيانات اليوزر نفسه من فايل اليوزر وكل المشاريع اللي تبعه في فايل المشاريع (هنا استخدام حتة الid) .. المشاريع هتتحط في ليستة ال__projects .. هتتحط كاوبجكتس من النوع بروجكت .. يعني كل مشروع يتكريته بروجكت ببياناته ويتضاف لليست
+        while True:
+            inputUsername = input("Enter your username: ")
+            inputPassword = input("Enter your password: ")
 
-        # السطرين الجايين مش لازم تقراهم
-        #  براحتك في حوار المشاريع دا .. ممكن تسيب الليستة فاضية لغاية ما يتطلب انها تتجاب
-        # بس الاحسن تجيبهم دلوقت عشان لما يقرر يكريت بروجكت ونحطه في الفايل ما نضطرش نروح نجيبهم من الاول وجديد .. لا احنا نزود الجديد على الليستة اللي جايبينها وخلاص
+            df = pd.read_csv('users.csv')
 
-        pass
+            if df[(df['username'] == inputUsername) & (df['password'] == inputPassword)].empty:
+                print("Invalid username or password.")
+            else:
+                user = df[(df['username'] == inputUsername) & (df['password'] == inputPassword)].iloc[0]
+                return User(user['id'], user['first_name'], user['last_name'], user['username'], user['email'], user['password'], user['phone'])
 
+inputForm = input("Enter [1] or 'register' to register, [2] or 'login' to login: ")
+if inputForm.lower() == 'register' or inputForm == '1':
+    new_user = User.register()
+    if new_user:
+        new_user.save_to_file()
+elif inputForm.lower() == 'login' or inputForm == '2':
+    user = User.login()
+    if user:
+        print("Login successful!")
 
-    #تقدر تعمل  في الكلاس فنكشنز تستعملها جوا الفنكشنز دي .. يعني مثلا تعمل فنكشن اسمها __validate_phone تاخد الرقم وترجع bool وتستخدمها وكدا.. لنضافة الكود بس ..وخليها فنكشنز برايفت بقى __
 
 
     def insert_project(self): #create project I mean..
