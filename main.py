@@ -32,6 +32,7 @@ class User:
     def __generate_user_id():
         #خلي جزء جلب اخر id + 1 دا هنا
         # واستخدمه في الفنكشن اللي فوق .. نضافة كود مش اكتر
+        
 
     @staticmethod
     def login():
