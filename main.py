@@ -46,6 +46,32 @@ class User:
         #  براحتك في حوار المشاريع دا .. ممكن تسيب الليستة فاضية لغاية ما يتطلب انها تتجاب
         # بس الاحسن تجيبهم دلوقت عشان لما يقرر يكريت بروجكت ونحطه في الفايل ما نضطرش نروح نجيبهم من الاول وجديد .. لا احنا نزود الجديد على الليستة اللي جايبينها وخلاص
 
+
+        file_path = './users.csv'
+        df = pd.read_csv(file_path, dtype={'email': str}, skipinitialspace=True)
+
+        # Email validation
+        user_email_input = input("Enter Your Email: ")
+        is_email_exist = df['email'].str.lower().isin([user_email_input.lower()]).any()
+
+        while not is_email_exist:
+            print("Email Not Exist")
+            user_email_input = input("Enter Your Email: ")
+            is_email_exist = df['email'].str.lower().isin([user_email_input.lower()]).any()
+
+        # Password validation
+        user_password_input = input("Enter Your Password: ")
+        try:
+            stored_password = df.loc[df['email'].str.lower() == user_email_input.lower(), 'password'].iloc[0]
+        except IndexError:
+            print("Email not found in the system.")
+            exit(1)
+
+        while str(stored_password) != user_password_input:
+            print("Password Is Not Correct")
+            user_password_input = input("Enter Your Password: ")
+
+        print("Welcome to The Fund Raising App")
         pass
 
 
@@ -218,9 +244,6 @@ class Project:
                   f"{(target_parts[i] if i < len(target_parts) else '').ljust(15)} | "
                   f"{(start_parts[i] if i < len(start_parts) else '').ljust(10)} | "
                   f"{(end_parts[i] if i < len(end_parts) else '').ljust(10)}")
-
-
-
 
 
     # لو عايز تعمل edit معقد .. غالبا هتحتاج setters
