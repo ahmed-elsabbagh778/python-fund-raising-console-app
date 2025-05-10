@@ -96,7 +96,11 @@ class User:
         
         id = User.__generate_user_id()
 
-        return User(id, inputFirstName, inputLastName, inputUsername, inputEmail, inputPassword, inputPhone)
+        
+
+        user = User(id, inputFirstName, inputLastName, inputUsername, inputEmail, inputPassword, inputPhone)
+        user.save_to_file()
+        return user
 
 
 
