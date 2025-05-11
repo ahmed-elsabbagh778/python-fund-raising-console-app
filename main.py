@@ -219,26 +219,24 @@ class User:
         
         pass
 
-def delete_project(self):
-    if not self.__projects:
-        print("You have no projects to delete.")
-        return
-    self.show_projects()  
+    def delete_project(self):
+        if not self.__projects:
+            print("You have no projects to delete.")
+            return
+        try:
+            project_id = int(input("Enter the ID of the project you want to delete: "))
+            
+            for project in self.__projects:
+                if hasattr(project, '_Project__id') and project._Project__id == project_id:
+                    project.delete()  
+                    self.__projects.remove(project)  
+                    print("Project deleted successfully.")
+                    return
 
-    try:
-        project_id = int(input("Enter the ID of the project you want to delete: "))
-        
-        for project in self.__projects:
-            if hasattr(project, '_Project__id') and project._Project__id == project_id:
-                project.delete()  
-                self.__projects.remove(project)  
-                print("Project deleted successfully.")
-                return
+            print("Project not found.")
 
-        print("Project not found.")
-
-    except ValueError:
-        print("Invalid input. Please enter a numeric ID.")
+        except ValueError:
+            print("Invalid input. Please enter a numeric ID.")
 
     def edit_project(self):
         #دي هتطلب id البروجكت وتدور عليه في الليست ولما تلاقيه..
