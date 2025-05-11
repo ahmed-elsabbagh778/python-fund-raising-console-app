@@ -175,7 +175,7 @@ class User:
 
                 for _, project in user_projects_data.iterrows():
                     project_obj = Project(
-                        project["id"],
+                        #project["id"],
                         project["title"],
                         project["details"],
                         project["target_amount"],
@@ -183,6 +183,7 @@ class User:
                         project["end_date"],
                         project["creator_id"],
                     )
+                    project_obj._Project__id = project["id"]
                     user_projects.append(project_obj)
 
                 return User(
@@ -216,22 +217,76 @@ class User:
         # برده يفضل يكون الvalidation فنكشن منفصلة __validate_date
         # وتقعد تعمل لوب لغاية ما تطلع valid وكدا
 
-        pass
+        print("\n--- Create a New Project ---")
+        title = input("Enter project title: ").strip()
+        details = input("Enter project details: ").strip()
+        
+        # Validate total amount
+        while True:
+            total_target = input("Enter total target amount: ").strip()
+            if total_target.isdigit():
+                break
+            else:
+                print("Target amount must be a number.")
+
+        # Validate start date
+        while True:
+            start_date = input("Enter start date (YYYY-MM-DD): ").strip()
+            try:
+                datetime.strptime(start_date, "%Y-%m-%d")
+                break
+            except ValueError:
+                print("Invalid date format. Please use YYYY-MM-DD.")
+
+        # Validate end date
+        while True:
+            end_date = input("Enter end date (YYYY-MM-DD): ").strip()
+            try:
+                datetime.strptime(end_date, "%Y-%m-%d")
+                if end_date >= start_date:
+                    break
+                else:
+                    print("End date must be after start date.")
+            except ValueError:
+                print("Invalid date format. Please use YYYY-MM-DD.")
+
+        # Save project
+        project = Project(
+            title=title,
+            details=details,
+            target_amount=total_target,
+            start_date=start_date,
+            end_date=end_date,
+            creator_id=self.__id  
+        )
+        project.insert()
+        self.__projects.append(project)
+
 
     def show_projects(self):
 
         # دي هتمسك الليست وتعرضها
         # لاحظ ان  الليست بتحتوي اوبجكتس من النوع بروجكت  ..
         # الاحسن نعمل فنكشن جوا البروجكت اسمها show ونلوب ونستخدمها لكل واحد منهم
+        
+        # If user wants to filter by date
+        filter_choice = input("Do you want to filter projects by date? (y/n): ").strip().lower()
+        if filter_choice == 'y':
+            filtered_projects = self.search_projects_by_date()
+
+            if not filtered_projects:
+                print("No projects match the given date range.")
+                return
+        else:
+            # Show all projects if no filter is applied
+            filtered_projects = self.__projects
         print(
             f"{'ID'.ljust(4)} | {'Title'.ljust(15)} | {'Details'.ljust(30)} | {'Target Amount'.ljust(15)} | {'Start Date'.ljust(10)} | {'End Date'.ljust(10)}"
         )
         print("-" * 100)
 
-        for project in self.__projects:
+        for project in filtered_projects:
             project.show()
-
-        pass
 
     def delete_project(self):
         if not self.__projects:
@@ -353,14 +408,49 @@ class User:
             project._Project__end_date = new_end_date
 
             print("Project updated successfully.")
+   
+    # search by date 
+    def search_projects_by_date(self):
+        search_start_date = input("Enter start date to search (YYYY-MM-DD) or leave empty to skip: ").strip()
+        search_end_date = input("Enter end date to search (YYYY-MM-DD) or leave empty to skip: ").strip()
 
+        if search_start_date:
+            try:
+                search_start_date = datetime.strptime(search_start_date, "%Y-%m-%d")
+            except ValueError:
+                print("Invalid start date format. Please use YYYY-MM-DD.")
+                return []
+
+        if search_end_date:
+            try:
+                search_end_date = datetime.strptime(search_end_date, "%Y-%m-%d")
+            except ValueError:
+                print("Invalid end date format. Please use YYYY-MM-DD.")
+                return []
+
+        filtered_projects = []
+
+        for project in self.__projects:
+            project_start_date = datetime.strptime(project.get_start_date(), "%Y-%m-%d")
+            project_end_date = datetime.strptime(project.get_end_date(), "%Y-%m-%d")
+
+            if search_start_date and project_start_date < search_start_date:
+                continue  
+            if search_end_date and project_end_date > search_end_date:
+                continue  
+
+            filtered_projects.append(project)
+
+        return filtered_projects
+
+    
 
 # Project class to handle project creation, editing, deletion, and viewing
 class Project:
     def __init__(
-        self, id, title, details, target_amount, start_date, end_date, creator_id
+        self,title, details, target_amount, start_date, end_date, creator_id
     ):
-        self.__id = id
+        self.__id = None
         self.__title = title
         self.__details = details
         self.__target_amount = target_amount
@@ -429,7 +519,13 @@ class Project:
                 break
 
         return list_of_splits
+    
+    def get_start_date(self):
+        return self.__start_date
 
+    def get_end_date(self):
+        return self.__end_date
+    
     def show(self):
         title_parts = Project.__split_string(str(self.__title), 15)
         details_parts = Project.__split_string(str(self.__details), 30)
