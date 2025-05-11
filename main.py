@@ -203,15 +203,26 @@ elif inputForm.lower() == 'login' or inputForm == '2':
         
         pass
 
-    def delete_project(self):
-        #  دي هتطلب id البروجكت وتدور عليه في الليست ولما تلاقيه هتمسكه وتشغل منه فنكشن delete ..ديليت دي بقى هتدلته من فايل البروجكتس ..مالناش دعوة ازاي دلوقت
-        #project.delete()
-        #  ثم تشيله من الليستة باستخدام remove
-        #    self.__projects.remove(project)
+def delete_project(self):
+    if not self.__projects:
+        print("You have no projects to delete.")
+        return
+    self.show_projects()  
 
-        # ولو ما لقيتهوش  اصلا تقولله مالقتش حاجة
+    try:
+        project_id = int(input("Enter the ID of the project you want to delete: "))
+        
+        for project in self.__projects:
+            if hasattr(project, '_Project__id') and project._Project__id == project_id:
+                project.delete()  
+                self.__projects.remove(project)  
+                print("Project deleted successfully.")
+                return
 
-        pass
+        print("Project not found.")
+
+    except ValueError:
+        print("Invalid input. Please enter a numeric ID.")
 
     def edit_project(self):
         #دي هتطلب id البروجكت وتدور عليه في الليست ولما تلاقيه..
