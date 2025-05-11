@@ -6,8 +6,7 @@ from datetime import datetime
 
 class User:
     def __init__(
-        self, id, first_name, last_name, username, email, password, phone, projects=[]
-    ):
+        self, id, first_name, last_name, username, email, password, phone, projects=[]):
         self.__id = id
         self.__first_name = first_name
         self.__last_name = last_name
@@ -103,10 +102,8 @@ class User:
             else:
                 break
 
-        id = User.__generate_user_id()
-
         user = User(
-            id,
+            User.generate_user_id(),
             inputFirstName,
             inputLastName,
             inputUsername,
@@ -118,7 +115,7 @@ class User:
         return user
 
     @staticmethod
-    def __generate_user_id():
+    def generate_user_id():
         file_path = "users.csv"
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
@@ -175,7 +172,7 @@ class User:
 
                 for _, project in user_projects_data.iterrows():
                     project_obj = Project(
-                        #project["id"],
+                        project["id"],
                         project["title"],
                         project["details"],
                         project["target_amount"],
@@ -202,25 +199,7 @@ class User:
         pattern = r"^\d{4}-\d{2}-\d{2}$"
         return bool(re.match(pattern, date_str))
     
-    def insert_project(self):  # create project I mean..
-        # هنا برده هتاخد بيانات المشروع واحدة واحدة من اليوزر
-        # البيانات هي title, details, target_amount, start_date, end_date (ادي بصة على كلاس بروجكت تحت)
-        # هتاخدهم وتعمل بيهم اوبجكت من النوع بروجكت (ادي بصة على كلاس بروجكت تحت)
-        # الاوبجكت دا هياخد منك بقى زيادة عليهم الid بتاع اليوزر اللي مستدعي الفنكشن اللي احنا فيها دي
-
-        # وغالبا هنضطر كمان نديله id للبروجكت ذات نفسه عشان نتعامل مع البروجكت بعدين .. فبرده هنشوف اخر id في فايل البروجكتس ونزود عليه 1 ونديهوله
-        # بس الid دا خلي اوبجكت البروجكت بقى هو اللي مسؤول يعملها
-        # هي مش ضرورية لحظة انشاء اوبجكت بروجكت .. هي ضرورية لحظة الinsert
-        # project = Project(title, details, target_amount, start_date, end_date, self.__id) فالمهم هنكريت بس كدا دلوقت
-
-        # اوبجكت البروجكت فيه فنكشن insert اسمها  .. انسرت دي بقى هي هتحط بيانات الاوبكت دا على فايل البروجكتس .. مالناش دعوة ازاي دلوقت لما نجيلها.. المهم هتستخدمها على طول
-        # project.insert()
-        #  ويدوب بقى زود البروجكت  في الليستة
-        # self.__projects.append(project)
-
-        # خدت بالي اننا لازم نعمل validation على التاريخ ..
-        # برده يفضل يكون الvalidation فنكشن منفصلة __validate_date
-        # وتقعد تعمل لوب لغاية ما تطلع valid وكدا
+    def insert_project(self):
 
         print("\n--- Create a New Project ---")
         title = input("Enter project title: ").strip()
@@ -259,6 +238,7 @@ class User:
 
         # Save project
         project = Project(
+            id=Project.generate_project_id(),
             title=title,
             details=details,
             target_amount=total_target,
@@ -272,9 +252,7 @@ class User:
 
     def show_projects(self):
 
-        # دي هتمسك الليست وتعرضها
-        # لاحظ ان  الليست بتحتوي اوبجكتس من النوع بروجكت  ..
-        # الاحسن نعمل فنكشن جوا البروجكت اسمها show ونلوب ونستخدمها لكل واحد منهم
+
         
         # If user wants to filter by date
         filter_choice = input("Do you want to filter projects by date? (y/n): ").strip().lower()
@@ -317,104 +295,104 @@ class User:
         except ValueError:
             print("Invalid input. Please enter a numeric ID.")
 
-        def edit_project(self):
-            if not self.__projects:
-                print("You have no projects to edit.")
-                return
+    def edit_project(self):
+        if not self.__projects:
+            print("You have no projects to edit.")
+            return
 
-            self.show_projects()
+        self.show_projects()
+        try:
+            project_id = int(input("Enter the ID of the project to edit: "))
+        except ValueError:
+            print("Please enter a valid numeric ID.")
+            return
+
+        # Finding the chosen project by ID
+        project = next(
+            (p for p in self.__projects if p._Project__id == project_id), None
+        )
+        if project is None:
+            print("Project not found.")
+            return
+
+        print("Leave any prompt blank to keep its current value.\n")
+
+        # Either you'll put the new values or it'll keep the old ones
+        # Title
+        current_title = project._Project__title
+        title_input = input(f"Title [{current_title}]: ")
+        new_title = title_input.strip() or current_title
+
+        # Details
+        current_details = project._Project__details
+        details_input = input(f"Details [{current_details}]: ")
+        new_details = details_input.strip() or current_details
+
+        # Target amount
+        while True:
+            current_target = project._Project__target_amount
+            target_input = input(
+                f"Target amount (EGP) [{current_target}]: "
+            ).strip()
+            if not target_input:
+                new_target_amount = current_target
+                break
             try:
-                project_id = int(input("Enter the ID of the project to edit: "))
+                new_target_amount = float(target_input)
+                break
             except ValueError:
-                print("Please enter a valid numeric ID.")
-                return
+                print("Invalid number. Please enter a numeric value.")
 
-            # Finding the chosen project by ID
-            project = next(
-                (p for p in self.__projects if p._Project__id == project_id), None
-            )
-            if project is None:
-                print("Project not found.")
-                return
-
-            print("Leave any prompt blank to keep its current value.\n")
-
-            # Either you'll put the new values or it'll keep the old ones
-            # Title
-            current_title = project._Project__title
-            title_input = input(f"Title [{current_title}]: ")
-            new_title = title_input.strip() or current_title
-
-            # Details
-            current_details = project._Project__details
-            details_input = input(f"Details [{current_details}]: ")
-            new_details = details_input.strip() or current_details
-
-            # Target amount
+        # Date
+        def prompt_for_date(prompt_text, current_value):
             while True:
-                current_target = project._Project__target_amount
-                target_input = input(
-                    f"Target amount (EGP) [{current_target}]: "
-                ).strip()
-                if not target_input:
-                    new_target_amount = current_target
-                    break
+                date_input = input(f"{prompt_text} [{current_value}]: ").strip()
+                if not date_input:
+                    return current_value
                 try:
-                    new_target_amount = float(target_input)
-                    break
+                    # validate format
+                    datetime.strptime(date_input, "%Y-%m-%d")
+                    return date_input
                 except ValueError:
-                    print("Invalid number. Please enter a numeric value.")
+                    print("Invalid format. Use YYYY-MM-DD.")
 
-            # Date
-            def prompt_for_date(prompt_text, current_value):
-                while True:
-                    date_input = input(f"{prompt_text} [{current_value}]: ").strip()
-                    if not date_input:
-                        return current_value
-                    try:
-                        # validate format
-                        datetime.strptime(date_input, "%Y-%m-%d")
-                        return date_input
-                    except ValueError:
-                        print("Invalid format. Use YYYY-MM-DD.")
+        # Start date
+        current_start = project._Project__start_date
+        new_start_date = prompt_for_date("Start date", current_start)
 
-            # Start date
-            current_start = project._Project__start_date
-            new_start_date = prompt_for_date("Start date", current_start)
+        # End date
+        current_end = project._Project__end_date
+        new_end_date = prompt_for_date("End date", current_end)
 
-            # End date
-            current_end = project._Project__end_date
-            new_end_date = prompt_for_date("End date", current_end)
+        # Ensure end > start
+        start_dt = datetime.strptime(new_start_date, "%Y-%m-%d")
+        end_dt = datetime.strptime(new_end_date, "%Y-%m-%d")
+        if end_dt <= start_dt:
+            print("Error: End date must be after start date.")
+            return
 
-            # Ensure end > start
-            start_dt = datetime.strptime(new_start_date, "%Y-%m-%d")
-            end_dt = datetime.strptime(new_end_date, "%Y-%m-%d")
-            if end_dt <= start_dt:
-                print("Error: End date must be after start date.")
-                return
+        # Update CSV on disk
+        projects_df = pd.read_csv("projects.csv")
+        projects_df.loc[
+            projects_df["id"] == project_id,
+            ["title", "details", "target_amount", "start_date", "end_date"],
+        ] = [
+            new_title,
+            new_details,
+            new_target_amount,
+            new_start_date,
+            new_end_date,
+        ]
+        projects_df.to_csv("projects.csv", index=False)
 
-            # Update CSV on disk
-            projects_df = pd.read_csv("projects.csv")
-            projects_df.loc[
-                projects_df["id"] == project_id,
-                ["title", "details", "target_amount", "start_date", "end_date"],
-            ] = [
-                new_title,
-                new_details,
-                new_target_amount,
-                new_start_date,
-                new_end_date,
-            ]
-            projects_df.to_csv("projects.csv", index=False)
+        # Update the object as if the user wanna display it here, it has to show the new values, not the old ones.
+        project._Project__title = new_title
+        project._Project__details = new_details
+        project._Project__target_amount = new_target_amount
+        project._Project__start_date = new_start_date
+        project._Project__end_date = new_end_date
 
-            # Update the object as if the user wanna display it here, it has to show the new values, not the old ones.
-            project._Project__title = new_title
-            project._Project__details = new_details
-            project._Project__target_amount = new_target_amount
-            project._Project__start_date = new_start_date
-            project._Project__end_date = new_end_date
-
-            print("Project updated successfully.")
+        print("Project updated successfully.")
    
     # search by date 
     def search_projects_by_date(self):
@@ -461,9 +439,9 @@ class User:
 # Project class to handle project creation, editing, deletion, and viewing
 class Project:
     def __init__(
-        self,title, details, target_amount, start_date, end_date, creator_id
+        self,id,title, details, target_amount, start_date, end_date, creator_id
     ):
-        self.__id = None
+        self.__id = id
         self.__title = title
         self.__details = details
         self.__target_amount = target_amount
@@ -472,10 +450,6 @@ class Project:
         self.__creator_id = creator_id
 
     def insert(self):
-        # دي هتجيب id بس الاول وبعدين تحط البيانات كلها بقى بالid بكله في الفايل
-        # يعني قصدي هتعمل self.__id = id عشان هنحتاجه طبعا
-        # وبعدين تحط كل البيانات دي كبروجكت في فايل البروجكتس مرة واحدة
-
         try:
             self.__id = Project.generate_project_id()
             new_project = {
@@ -505,9 +479,6 @@ class Project:
 
     @staticmethod
     def generate_project_id():
-        # خلي جزء جلب اخر id + 1 دا هنا
-        # واستخدمه في الفنكشن اللي فوق .. نضافة كود مش اكتر
-
         file_path = "projects.csv"
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
@@ -516,8 +487,6 @@ class Project:
         return 1
 
     def delete(self):
-        # هنا هتاخد الid وتروح تشيل الريكورد بتاعه من الفايل بس وخلاص
-        # .. لقطة حلوة انك تdestruct الاوجكت بعدها
         pass
 
     @staticmethod
@@ -565,7 +534,6 @@ class Project:
                 f"{(end_parts[i] if i < len(end_parts) else '').ljust(10)}"
             )
 
-    # لو عايز تعمل edit معقد .. غالبا هتحتاج setters
 
 
 if __name__ == "__main__":
