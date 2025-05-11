@@ -1,10 +1,13 @@
 import pandas as pd
 import os
 import re
+from datetime import datetime
 
 
 class User:
-    def __init__(self, id, first_name, last_name, username, email, password, phone,projects=[]):
+    def __init__(
+        self, id, first_name, last_name, username, email, password, phone, projects=[]
+    ):
         self.__id = id
         self.__first_name = first_name
         self.__last_name = last_name
@@ -20,111 +23,120 @@ class User:
         while True:
             inputFirstName = input("Enter your first name: ")
             if inputFirstName.lower() == "exit":
-                print('Registration Cancelled')
+                print("Registration Cancelled")
                 return
-            if not re.match(r'^[a-zA-Z]+$', inputFirstName):
+            if not re.match(r"^[a-zA-Z]+$", inputFirstName):
                 print("Invalid name. Only letters are allowed.")
-                continue  
-            else:   
+                continue
+            else:
                 break
-            
+
         while True:
             inputLastName = input("Enter your last name: ")
             if inputLastName.lower() == "exit":
-                print('Registration Cancelled')
+                print("Registration Cancelled")
                 return
-            if not re.match(r'^[a-zA-Z]+$', inputLastName):
+            if not re.match(r"^[a-zA-Z]+$", inputLastName):
                 print("Invalid name. Only letters are allowed.")
-                continue  
-            else:   
+                continue
+            else:
                 break
 
         while True:
             inputUsername = input("Enter your username: ")
             if inputUsername.lower() == "exit":
-                print('Registration Cancelled')
+                print("Registration Cancelled")
                 return
-            if not re.match(r'^[a-zA-Z]+[0-9]*$', inputUsername):
+            if not re.match(r"^[a-zA-Z]+[0-9]*$", inputUsername):
                 print("Invalid username. Only letters and numbers are allowed.")
-                continue  
-            else:   
+                continue
+            else:
                 break
 
         while True:
             inputEmail = input("Enter your email: ")
             if inputEmail.lower() == "exit":
-                print('Registration Cancelled')
+                print("Registration Cancelled")
                 return
-            if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', inputEmail):
+            if not re.match(
+                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", inputEmail
+            ):
                 print("Invalid email.")
-                continue  
-            else:   
+                continue
+            else:
                 break
 
         while True:
             inputPassword = input("Enter your password: ")
             if inputPassword.lower() == "exit":
-                print('Registration Cancelled')
+                print("Registration Cancelled")
                 return
-            if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$'
-, inputPassword):
-                print("Invalid password. Password must be at least 8 characters long and contain at least one letter and one number and one special character")
-                continue  
-            else:   
+            if not re.match(
+                r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$", inputPassword
+            ):
+                print(
+                    "Invalid password. Password must be at least 8 characters long and contain at least one letter and one number and one special character"
+                )
+                continue
+            else:
                 break
 
         while True:
             inputConfirmPassword = input("Confirm your password: ")
             if inputConfirmPassword.lower() == "exit":
-                print('Registration Cancelled')
+                print("Registration Cancelled")
                 return
             if inputPassword != inputConfirmPassword:
                 print("Passwords do not match.")
-                continue  
-            else:   
+                continue
+            else:
                 break
 
         while True:
             inputPhone = input("Enter your phone number: ")
             if inputPhone.lower() == "exit":
-                print('Registration Cancelled')
+                print("Registration Cancelled")
                 return
-            if not re.match(r'^01[0125][0-9]{8}$', inputPhone):
-                print('Invalid Egyptian Phone')
-                continue  
-            else:   
+            if not re.match(r"^01[0125][0-9]{8}$", inputPhone):
+                print("Invalid Egyptian Phone")
+                continue
+            else:
                 break
-        
+
         id = User.__generate_user_id()
 
-        
-
-        user = User(id, inputFirstName, inputLastName, inputUsername, inputEmail, inputPassword, inputPhone)
+        user = User(
+            id,
+            inputFirstName,
+            inputLastName,
+            inputUsername,
+            inputEmail,
+            inputPassword,
+            inputPhone,
+        )
         user.save_to_file()
         return user
 
-
-
     @staticmethod
     def __generate_user_id():
-        file_path = 'users.csv'
+        file_path = "users.csv"
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
             if not df.empty:
-                return int(df.tail(1)['id'].iloc[0]) + 1
+                return int(df.tail(1)["id"].iloc[0]) + 1
         return 1
-    
+
     def save_to_file(self):
-        file_path = 'users.csv'
+        file_path = "users.csv"
 
         user_data = {
-            'id': [self.__id],
-            'first_name': [self.__first_name],
-            'last_name': [self.__last_name],
-            'username': [self.__username],
-            'email': [self.__email],
-            'password': [self.__password],
-            'phone': [self.__phone]
+            "id": [self.__id],
+            "first_name": [self.__first_name],
+            "last_name": [self.__last_name],
+            "username": [self.__username],
+            "email": [self.__email],
+            "password": [self.__password],
+            "phone": [self.__phone],
         }
 
         df_new = pd.DataFrame(user_data)
@@ -144,79 +156,81 @@ class User:
             inputUsername = input("Enter your username: ")
             inputPassword = input("Enter your password: ")
 
-            df = pd.read_csv('users.csv')
+            df = pd.read_csv("users.csv")
 
-            user_data = df[(df['username'] == inputUsername) & (df['password'] == inputPassword)]
+            user_data = df[
+                (df["username"] == inputUsername) & (df["password"] == inputPassword)
+            ]
 
             if user_data.empty:
                 print("Invalid username or password.")
             else:
                 user = user_data.iloc[0]
 
-                projects_df = pd.read_csv('projects.csv')
-                user_projects_data = projects_df[projects_df['creator_id'] == user['id']]
+                projects_df = pd.read_csv("projects.csv")
+                user_projects_data = projects_df[
+                    projects_df["creator_id"] == user["id"]
+                ]
                 user_projects = []
 
                 for _, project in user_projects_data.iterrows():
                     project_obj = Project(
-                        project['id'],
-                        project['title'],
-                        project['details'],
-                        project['target_amount'],
-                        project['start_date'],
-                        project['end_date'],
-                        project['creator_id']
+                        project["id"],
+                        project["title"],
+                        project["details"],
+                        project["target_amount"],
+                        project["start_date"],
+                        project["end_date"],
+                        project["creator_id"],
                     )
                     user_projects.append(project_obj)
 
-                return User(user['id'], user['first_name'], user['last_name'], user['username'], user['email'], user['password'], user['phone'],user_projects)
+                return User(
+                    user["id"],
+                    user["first_name"],
+                    user["last_name"],
+                    user["username"],
+                    user["email"],
+                    user["password"],
+                    user["phone"],
+                    user_projects,
+                )
 
+    def insert_project(self):  # create project I mean..
+        # هنا برده هتاخد بيانات المشروع واحدة واحدة من اليوزر
+        # البيانات هي title, details, target_amount, start_date, end_date (ادي بصة على كلاس بروجكت تحت)
+        # هتاخدهم وتعمل بيهم اوبجكت من النوع بروجكت (ادي بصة على كلاس بروجكت تحت)
+        # الاوبجكت دا هياخد منك بقى زيادة عليهم الid بتاع اليوزر اللي مستدعي الفنكشن اللي احنا فيها دي
 
+        # وغالبا هنضطر كمان نديله id للبروجكت ذات نفسه عشان نتعامل مع البروجكت بعدين .. فبرده هنشوف اخر id في فايل البروجكتس ونزود عليه 1 ونديهوله
+        # بس الid دا خلي اوبجكت البروجكت بقى هو اللي مسؤول يعملها
+        # هي مش ضرورية لحظة انشاء اوبجكت بروجكت .. هي ضرورية لحظة الinsert
+        # project = Project(title, details, target_amount, start_date, end_date, self.__id) فالمهم هنكريت بس كدا دلوقت
 
+        # اوبجكت البروجكت فيه فنكشن insert اسمها  .. انسرت دي بقى هي هتحط بيانات الاوبكت دا على فايل البروجكتس .. مالناش دعوة ازاي دلوقت لما نجيلها.. المهم هتستخدمها على طول
+        # project.insert()
+        #  ويدوب بقى زود البروجكت  في الليستة
+        # self.__projects.append(project)
 
-
-    def insert_project(self): #create project I mean..
-    #هنا برده هتاخد بيانات المشروع واحدة واحدة من اليوزر
-    # البيانات هي title, details, target_amount, start_date, end_date (ادي بصة على كلاس بروجكت تحت)
-    # هتاخدهم وتعمل بيهم اوبجكت من النوع بروجكت (ادي بصة على كلاس بروجكت تحت)
-    # الاوبجكت دا هياخد منك بقى زيادة عليهم الid بتاع اليوزر اللي مستدعي الفنكشن اللي احنا فيها دي
-
-    # وغالبا هنضطر كمان نديله id للبروجكت ذات نفسه عشان نتعامل مع البروجكت بعدين .. فبرده هنشوف اخر id في فايل البروجكتس ونزود عليه 1 ونديهوله
-    # بس الid دا خلي اوبجكت البروجكت بقى هو اللي مسؤول يعملها
-    # هي مش ضرورية لحظة انشاء اوبجكت بروجكت .. هي ضرورية لحظة الinsert
-    # project = Project(title, details, target_amount, start_date, end_date, self.__id) فالمهم هنكريت بس كدا دلوقت
-
-    # اوبجكت البروجكت فيه فنكشن insert اسمها  .. انسرت دي بقى هي هتحط بيانات الاوبكت دا على فايل البروجكتس .. مالناش دعوة ازاي دلوقت لما نجيلها.. المهم هتستخدمها على طول
-    #project.insert()
-    #  ويدوب بقى زود البروجكت  في الليستة
-    #self.__projects.append(project)
-
-
-
-    # خدت بالي اننا لازم نعمل validation على التاريخ ..
-    # برده يفضل يكون الvalidation فنكشن منفصلة __validate_date
-    # وتقعد تعمل لوب لغاية ما تطلع valid وكدا
+        # خدت بالي اننا لازم نعمل validation على التاريخ ..
+        # برده يفضل يكون الvalidation فنكشن منفصلة __validate_date
+        # وتقعد تعمل لوب لغاية ما تطلع valid وكدا
 
         pass
 
     def show_projects(self):
 
-
-
-            #دي هتمسك الليست وتعرضها
-            # لاحظ ان  الليست بتحتوي اوبجكتس من النوع بروجكت  ..
-            # الاحسن نعمل فنكشن جوا البروجكت اسمها show ونلوب ونستخدمها لكل واحد منهم
+        # دي هتمسك الليست وتعرضها
+        # لاحظ ان  الليست بتحتوي اوبجكتس من النوع بروجكت  ..
+        # الاحسن نعمل فنكشن جوا البروجكت اسمها show ونلوب ونستخدمها لكل واحد منهم
         print(
-            f"{'ID'.ljust(4)} | {'Title'.ljust(15)} | {'Details'.ljust(30)} | {'Target Amount'.ljust(15)} | {'Start Date'.ljust(10)} | {'End Date'.ljust(10)}")
+            f"{'ID'.ljust(4)} | {'Title'.ljust(15)} | {'Details'.ljust(30)} | {'Target Amount'.ljust(15)} | {'Start Date'.ljust(10)} | {'End Date'.ljust(10)}"
+        )
         print("-" * 100)
 
-
-        for project in  self.__projects:
+        for project in self.__projects:
             project.show()
 
-
-
-        
         pass
 
     def delete_project(self):
@@ -225,11 +239,14 @@ class User:
             return
         try:
             project_id = int(input("Enter the ID of the project you want to delete: "))
-            
+
             for project in self.__projects:
-                if hasattr(project, '_Project__id') and project._Project__id == project_id:
-                    project.delete()  
-                    self.__projects.remove(project)  
+                if (
+                    hasattr(project, "_Project__id")
+                    and project._Project__id == project_id
+                ):
+                    project.delete()
+                    self.__projects.remove(project)
                     print("Project deleted successfully.")
                     return
 
@@ -238,31 +255,111 @@ class User:
         except ValueError:
             print("Invalid input. Please enter a numeric ID.")
 
-    def edit_project(self):
-        #دي هتطلب id البروجكت وتدور عليه في الليست ولما تلاقيه..
-        # مش عارف بقى في كذا طريقة
-        # أروق طريقة في دماغي انك تروح مشغل فنكشن insert_project وخلاص xD
-        # وبعدها تشغل delete_project على القديم
-        # شغلله بس show قبلها عشان يشوف البروجكت اللي هو بيعدله وخلاص
+        def edit_project(self):
+            if not self.__projects:
+                print("You have no projects to edit.")
+                return
 
-        pass
+            self.show_projects()
+            try:
+                project_id = int(input("Enter the ID of the project to edit: "))
+            except ValueError:
+                print("Please enter a valid numeric ID.")
+                return
 
+            # Finding the chosen project by ID
+            project = next(
+                (p for p in self.__projects if p._Project__id == project_id), None
+            )
+            if project is None:
+                print("Project not found.")
+                return
 
-    def show_projects_by_date(self):
-        #هتاخد التاريخ وتدور جوا الليستة برده وكدا وتعرض
-        pass
+            print("Leave any prompt blank to keep its current value.\n")
 
+            # Either you'll put the new values or it'll keep the old ones
+            # Title
+            current_title = project._Project__title
+            title_input = input(f"Title [{current_title}]: ")
+            new_title = title_input.strip() or current_title
 
+            # Details
+            current_details = project._Project__details
+            details_input = input(f"Details [{current_details}]: ")
+            new_details = details_input.strip() or current_details
 
+            # Target amount
+            while True:
+                current_target = project._Project__target_amount
+                target_input = input(
+                    f"Target amount (EGP) [{current_target}]: "
+                ).strip()
+                if not target_input:
+                    new_target_amount = current_target
+                    break
+                try:
+                    new_target_amount = float(target_input)
+                    break
+                except ValueError:
+                    print("Invalid number. Please enter a numeric value.")
 
-        # ملحوظة .. المفروض الاختيارات بتاعة القائمة دي يتعمللها كلاس لوحدها اسمه المينيو مثلا وكل مسؤوليته انه بيجمع البيانات زي ما قلنا
-        # وبعد ما يجمع مثلا بيانات الregistration يروح يبعتها لفنكشن register اللي في كلاس User (هتكون بتاخد انبوتس بقى) وهي تبقى مسؤوليتها انها تكريت نيو يوزر وتحطه في الفايل وكدا
-        # بس انا خليت كله هنا عشان ما نتحولش
+            # Date
+            def prompt_for_date(prompt_text, current_value):
+                while True:
+                    date_input = input(f"{prompt_text} [{current_value}]: ").strip()
+                    if not date_input:
+                        return current_value
+                    try:
+                        # validate format
+                        datetime.strptime(date_input, "%Y-%m-%d")
+                        return date_input
+                    except ValueError:
+                        print("Invalid format. Use YYYY-MM-DD.")
+
+            # Start date
+            current_start = project._Project__start_date
+            new_start_date = prompt_for_date("Start date", current_start)
+
+            # End date
+            current_end = project._Project__end_date
+            new_end_date = prompt_for_date("End date", current_end)
+
+            # Ensure end > start
+            start_dt = datetime.strptime(new_start_date, "%Y-%m-%d")
+            end_dt = datetime.strptime(new_end_date, "%Y-%m-%d")
+            if end_dt <= start_dt:
+                print("Error: End date must be after start date.")
+                return
+
+            # Update CSV on disk
+            projects_df = pd.read_csv("projects.csv")
+            projects_df.loc[
+                projects_df["id"] == project_id,
+                ["title", "details", "target_amount", "start_date", "end_date"],
+            ] = [
+                new_title,
+                new_details,
+                new_target_amount,
+                new_start_date,
+                new_end_date,
+            ]
+            projects_df.to_csv("projects.csv", index=False)
+
+            # Update the object as if the user wanna display it here, it has to show the new values, not the old ones.
+            project._Project__title = new_title
+            project._Project__details = new_details
+            project._Project__target_amount = new_target_amount
+            project._Project__start_date = new_start_date
+            project._Project__end_date = new_end_date
+
+            print("Project updated successfully.")
 
 
 # Project class to handle project creation, editing, deletion, and viewing
 class Project:
-    def __init__(self,id, title, details, target_amount, start_date, end_date, creator_id):
+    def __init__(
+        self, id, title, details, target_amount, start_date, end_date, creator_id
+    ):
         self.__id = id
         self.__title = title
         self.__details = details
@@ -276,20 +373,19 @@ class Project:
         # يعني قصدي هتعمل self.__id = id عشان هنحتاجه طبعا
         # وبعدين تحط كل البيانات دي كبروجكت في فايل البروجكتس مرة واحدة
 
-
         try:
             self.__id = Project.__generate_project_id()
             new_project = {
-                'id': self.__id,
-                'title': self.__title,
-                'details': self.__details,
-                'target_amount': self.__target_amount,
-                'start_date': self.__start_date,
-                'end_date': self.__end_date,
-                'creator_id': self.__creator_id
+                "id": self.__id,
+                "title": self.__title,
+                "details": self.__details,
+                "target_amount": self.__target_amount,
+                "start_date": self.__start_date,
+                "end_date": self.__end_date,
+                "creator_id": self.__creator_id,
             }
 
-            file_path = 'projects.csv'
+            file_path = "projects.csv"
 
             if os.path.exists(file_path):
                 df = pd.read_csv(file_path)
@@ -306,16 +402,15 @@ class Project:
 
     @staticmethod
     def __generate_project_id():
-    #خلي جزء جلب اخر id + 1 دا هنا
-    # واستخدمه في الفنكشن اللي فوق .. نضافة كود مش اكتر
+        # خلي جزء جلب اخر id + 1 دا هنا
+        # واستخدمه في الفنكشن اللي فوق .. نضافة كود مش اكتر
 
-        file_path = 'projects.csv'
+        file_path = "projects.csv"
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
             if not df.empty:
-                return int(df.tail(1)['id'].iloc[0]) + 1
+                return int(df.tail(1)["id"].iloc[0]) + 1
         return 1
-
 
     def delete(self):
         # هنا هتاخد الid وتروح تشيل الريكورد بتاعه من الفايل بس وخلاص
@@ -325,8 +420,8 @@ class Project:
     @staticmethod
     def __split_string(string, size):
         list_of_splits = []
-        while(True):
-            if len(string)>size:
+        while True:
+            if len(string) > size:
                 list_of_splits.append(string[:size])
                 string = string[size:]
             else:
@@ -334,8 +429,6 @@ class Project:
                 break
 
         return list_of_splits
-
-
 
     def show(self):
         title_parts = Project.__split_string(str(self.__title), 15)
@@ -345,22 +438,25 @@ class Project:
         end_parts = Project.__split_string(str(self.__end_date), 10)
         id_parts = Project.__split_string(str(self.__id), 4)
 
-        max_lines = max(len(title_parts), len(details_parts), len(target_parts), len(start_parts), len(end_parts))
+        max_lines = max(
+            len(title_parts),
+            len(details_parts),
+            len(target_parts),
+            len(start_parts),
+            len(end_parts),
+        )
 
         for i in range(max_lines):
-            print(f"{(id_parts[i] if i < len(id_parts) else '').ljust(4)} | "
-                  f"{(title_parts[i] if i < len(title_parts) else '').ljust(15)} | "
-                  f"{(details_parts[i] if i < len(details_parts) else '').ljust(30)} | "
-                  f"{(target_parts[i] if i < len(target_parts) else '').ljust(15)} | "
-                  f"{(start_parts[i] if i < len(start_parts) else '').ljust(10)} | "
-                  f"{(end_parts[i] if i < len(end_parts) else '').ljust(10)}")
-
-
-
-
+            print(
+                f"{(id_parts[i] if i < len(id_parts) else '').ljust(4)} | "
+                f"{(title_parts[i] if i < len(title_parts) else '').ljust(15)} | "
+                f"{(details_parts[i] if i < len(details_parts) else '').ljust(30)} | "
+                f"{(target_parts[i] if i < len(target_parts) else '').ljust(15)} | "
+                f"{(start_parts[i] if i < len(start_parts) else '').ljust(10)} | "
+                f"{(end_parts[i] if i < len(end_parts) else '').ljust(10)}"
+            )
 
     # لو عايز تعمل edit معقد .. غالبا هتحتاج setters
-
 
 
 if __name__ == "__main__":
