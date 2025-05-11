@@ -4,7 +4,7 @@ import re
 
 
 class User:
-    def __init__(self, id, first_name, last_name, username, email, password, phone):
+    def __init__(self, id, first_name, last_name, username, email, password, phone,projects=[]):
         self.__id = id
         self.__first_name = first_name
         self.__last_name = last_name
@@ -12,7 +12,7 @@ class User:
         self.__email = email
         self.__password = password
         self.__phone = phone
-        self.__projects = []
+        self.__projects = projects
 
     @staticmethod
     def register():
@@ -66,8 +66,9 @@ class User:
             if inputPassword.lower() == "exit":
                 print('Registration Cancelled')
                 return
-            if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$', inputPassword):
-                print("Invalid password. Password must be at least 8 characters long and contain at least one letter and one number.")
+            if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$'
+, inputPassword):
+                print("Invalid password. Password must be at least 8 characters long and contain at least one letter and one number and one special character")
                 continue  
             else:   
                 break
@@ -88,8 +89,8 @@ class User:
             if inputPhone.lower() == "exit":
                 print('Registration Cancelled')
                 return
-            if not re.match(r'^\+201[0125][0-9]{8}$', inputPhone):
-                print('Invalid Phone')
+            if not re.match(r'^01[0125][0-9]{8}$', inputPhone):
+                print('Invalid Egyptian Phone')
                 continue  
             else:   
                 break
@@ -145,21 +146,32 @@ class User:
 
             df = pd.read_csv('users.csv')
 
-            if df[(df['username'] == inputUsername) & (df['password'] == inputPassword)].empty:
+            user_data = df[(df['username'] == inputUsername) & (df['password'] == inputPassword)]
+
+            if user_data.empty:
                 print("Invalid username or password.")
             else:
-                user = df[(df['username'] == inputUsername) & (df['password'] == inputPassword)].iloc[0]
-                return User(user['id'], user['first_name'], user['last_name'], user['username'], user['email'], user['password'], user['phone'])
+                user = user_data.iloc[0]
 
-inputForm = input("Enter [1] or 'register' to register, [2] or 'login' to login: ")
-if inputForm.lower() == 'register' or inputForm == '1':
-    new_user = User.register()
-    if new_user:
-        new_user.save_to_file()
-elif inputForm.lower() == 'login' or inputForm == '2':
-    user = User.login()
-    if user:
-        print("Login successful!")
+                projects_df = pd.read_csv('projects.csv')
+                user_projects_data = projects_df[projects_df['creator_id'] == user['id']]
+                user_projects = []
+
+                for _, project in user_projects_data.iterrows():
+                    project_obj = Project(
+                        project['id'],
+                        project['title'],
+                        project['details'],
+                        project['target_amount'],
+                        project['start_date'],
+                        project['end_date'],
+                        project['creator_id']
+                    )
+                    user_projects.append(project_obj)
+
+                return User(user['id'], user['first_name'], user['last_name'], user['username'], user['email'], user['password'], user['phone'],user_projects)
+
+
 
 
 
@@ -194,11 +206,15 @@ elif inputForm.lower() == 'login' or inputForm == '2':
             #دي هتمسك الليست وتعرضها
             # لاحظ ان  الليست بتحتوي اوبجكتس من النوع بروجكت  ..
             # الاحسن نعمل فنكشن جوا البروجكت اسمها show ونلوب ونستخدمها لكل واحد منهم
-
-            # ومعلش قبل اي حاجة حط السطرين دول
         print(
             f"{'ID'.ljust(4)} | {'Title'.ljust(15)} | {'Details'.ljust(30)} | {'Target Amount'.ljust(15)} | {'Start Date'.ljust(10)} | {'End Date'.ljust(10)}")
         print("-" * 100)
+
+
+        for project in  self.__projects:
+            project.show()
+
+
 
         
         pass
@@ -248,7 +264,8 @@ def delete_project(self):
 
 # Project class to handle project creation, editing, deletion, and viewing
 class Project:
-    def __init__(self, title, details, target_amount, start_date, end_date, creator_id):
+    def __init__(self,id, title, details, target_amount, start_date, end_date, creator_id):
+        self.__id = id
         self.__title = title
         self.__details = details
         self.__target_amount = target_amount
@@ -303,7 +320,7 @@ class Project:
 
 
     def delete(self):
-        # هنا هتاخد الid وتروح تشيل الريكورد بتاعه من الفايل بس وخلاص يا احمد يا ابراهيم
+        # هنا هتاخد الid وتروح تشيل الريكورد بتاعه من الفايل بس وخلاص
         # .. لقطة حلوة انك تdestruct الاوجكت بعدها
         pass
 
@@ -330,7 +347,6 @@ class Project:
         end_parts = Project.__split_string(str(self.__end_date), 10)
         id_parts = Project.__split_string(str(self.__id), 4)
 
-        print(title_parts,details_parts)
         max_lines = max(len(title_parts), len(details_parts), len(target_parts), len(start_parts), len(end_parts))
 
         for i in range(max_lines):
@@ -349,16 +365,47 @@ class Project:
 
 
 
-
-# Main function to run the console app
 if __name__ == "__main__":
-    next_id = User._User__generate_user_id()
-    print(next_id)
-    #هنا انت هتساله register ولا login
-    # على حسب اللي هيختاره هتشغلله الفنكشن .. الاتنين بيرجعوا اوبجكت يوزر
-    # فمثلا
-    # user = login()
-    # بعد كدا هتساله بقى على باقي الخيارات .. فمثلا اختار ديليت بروجكت
-    # user.delete_project()
+    while True:
+        print("Choose an option:")
+        print("1. Register")
+        print("2. Login")
+        print("3. Exit")
 
-    pass
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            user = User.register()
+        elif choice == "2":
+            user = User.login()
+        elif choice == "3":
+            print("Exiting the application.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+            continue
+
+        while True:
+            print("\nWhat would you like to do?")
+            print("1. Create a project")
+            print("2. View your projects")
+            print("3. Delete a project")
+            print("4. Edit a project")
+            print("5. Logout")
+
+            action = input("Enter your choice: ")
+
+            if action == "1":
+                user.insert_project()
+            elif action == "2":
+                user.show_projects()
+            elif action == "3":
+                user.delete_project()
+            elif action == "4":
+                user.edit_project()
+            elif action == "5":
+                print("Logging out...")
+                break
+            else:
+                print("Invalid choice. Please try again.")
+                continue
