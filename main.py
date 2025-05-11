@@ -197,6 +197,11 @@ class User:
                     user_projects,
                 )
 
+    def is_valid_date_format(self,date_str):
+        # pattern: YYYY-MM-DD only (e.g., 2024-05-11)
+        pattern = r"^\d{4}-\d{2}-\d{2}$"
+        return bool(re.match(pattern, date_str))
+    
     def insert_project(self):  # create project I mean..
         # هنا برده هتاخد بيانات المشروع واحدة واحدة من اليوزر
         # البيانات هي title, details, target_amount, start_date, end_date (ادي بصة على كلاس بروجكت تحت)
@@ -232,23 +237,25 @@ class User:
         # Validate start date
         while True:
             start_date = input("Enter start date (YYYY-MM-DD): ").strip()
-            try:
-                datetime.strptime(start_date, "%Y-%m-%d")
-                break
-            except ValueError:
-                print("Invalid date format. Please use YYYY-MM-DD.")
+            if self.is_valid_date_format(start_date):
+                try:
+                    datetime.strptime(start_date, "%Y-%m-%d")
+                    break
+                except ValueError:
+                    print("Invalid date format. Please use YYYY-MM-DD.")
 
         # Validate end date
         while True:
             end_date = input("Enter end date (YYYY-MM-DD): ").strip()
-            try:
-                datetime.strptime(end_date, "%Y-%m-%d")
-                if end_date >= start_date:
-                    break
-                else:
-                    print("End date must be after start date.")
-            except ValueError:
-                print("Invalid date format. Please use YYYY-MM-DD.")
+            if self.is_valid_date_format(end_date):
+                try:
+                    datetime.strptime(end_date, "%Y-%m-%d")
+                    if end_date >= start_date:
+                        break
+                    else:
+                        print("End date must be after start date.")
+                except ValueError:
+                    print("Invalid date format. Please use YYYY-MM-DD.")
 
         # Save project
         project = Project(
@@ -415,13 +422,19 @@ class User:
         search_end_date = input("Enter end date to search (YYYY-MM-DD) or leave empty to skip: ").strip()
 
         if search_start_date:
+            if not self.is_valid_date_format(search_start_date):
+                print("Invalid start date format. Please use YYYY-MM-DD.")
+                return []
             try:
                 search_start_date = datetime.strptime(search_start_date, "%Y-%m-%d")
-            except ValueError:
+            except ValueError as e:
                 print("Invalid start date format. Please use YYYY-MM-DD.")
                 return []
 
         if search_end_date:
+            if not self.is_valid_date_format(search_end_date):
+                print("Invalid end date format. Please use YYYY-MM-DD.")
+                return []
             try:
                 search_end_date = datetime.strptime(search_end_date, "%Y-%m-%d")
             except ValueError:
@@ -464,7 +477,7 @@ class Project:
         # وبعدين تحط كل البيانات دي كبروجكت في فايل البروجكتس مرة واحدة
 
         try:
-            self.__id = Project.__generate_project_id()
+            self.__id = Project.generate_project_id()
             new_project = {
                 "id": self.__id,
                 "title": self.__title,
@@ -491,7 +504,7 @@ class Project:
             print(f"Error inserting project: {e}")
 
     @staticmethod
-    def __generate_project_id():
+    def generate_project_id():
         # خلي جزء جلب اخر id + 1 دا هنا
         # واستخدمه في الفنكشن اللي فوق .. نضافة كود مش اكتر
 
