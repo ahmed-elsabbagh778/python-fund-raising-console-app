@@ -396,28 +396,30 @@ class User:
    
     # search by date 
     def search_projects_by_date(self):
-        search_start_date = input("Enter start date to search (YYYY-MM-DD) or leave empty to skip: ").strip()
-        search_end_date = input("Enter end date to search (YYYY-MM-DD) or leave empty to skip: ").strip()
+        while True:
+            search_start_date = input("Enter start date to search (YYYY-MM-DD) or leave empty to skip: ").strip()
+            if not search_start_date:
+                break
+            if self.is_valid_date_format(search_start_date):
+                try:
+                    search_start_date = datetime.strptime(search_start_date, "%Y-%m-%d")
+                    break
+                except ValueError:
+                    pass
+            print("Invalid start date format. Please use YYYY-MM-DD.")
 
-        if search_start_date:
-            if not self.is_valid_date_format(search_start_date):
-                print("Invalid start date format. Please use YYYY-MM-DD.")
-                return []
-            try:
-                search_start_date = datetime.strptime(search_start_date, "%Y-%m-%d")
-            except ValueError as e:
-                print("Invalid start date format. Please use YYYY-MM-DD.")
-                return []
-
-        if search_end_date:
-            if not self.is_valid_date_format(search_end_date):
-                print("Invalid end date format. Please use YYYY-MM-DD.")
-                return []
-            try:
-                search_end_date = datetime.strptime(search_end_date, "%Y-%m-%d")
-            except ValueError:
-                print("Invalid end date format. Please use YYYY-MM-DD.")
-                return []
+        # End date input with validation loop
+        while True:
+            search_end_date = input("Enter end date to search (YYYY-MM-DD) or leave empty to skip: ").strip()
+            if not search_end_date:
+                break
+            if self.is_valid_date_format(search_end_date):
+                try:
+                    search_end_date = datetime.strptime(search_end_date, "%Y-%m-%d")
+                    break
+                except ValueError:
+                    pass  # fallback to show error message below
+            print("Invalid end date format. Please use YYYY-MM-DD.")
 
         filtered_projects = []
 
