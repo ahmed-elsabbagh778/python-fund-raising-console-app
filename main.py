@@ -193,8 +193,8 @@ class User:
                     user["phone"],
                     user_projects,
                 )
-
-    def is_valid_date_format(self,date_str):
+    @staticmethod
+    def is_valid_date_format(date_str):
         # pattern: YYYY-MM-DD only (e.g., 2024-05-11)
         pattern = r"^\d{4}-\d{2}-\d{2}$"
         return bool(re.match(pattern, date_str))
@@ -296,6 +296,12 @@ class User:
             print("Invalid input. Please enter a numeric ID.")
 
     def edit_project(self):
+
+        # if you like, you can use the function User.is_valid_date_format() (Asmaa implemented) instead of datetime.strptime(), the function uses regex ensure having the format we discussed (YYYY-MM-DD) and not (YYYY-M-D)
+        # add as many getters and setters in the Project class as you need. For some reason you will find get_start_date() and get_end_date() already there
+        # ensure the whole function doesnt terminate (return, I guess) whenever end_date > start_date
+        # I hope there is nothing else to do b2a
+        # thank you and here you get an emoji from me <3 (a heart)
         if not self.__projects:
             print("You have no projects to edit.")
             return
@@ -400,12 +406,13 @@ class User:
             search_start_date = input("Enter start date to search (YYYY-MM-DD) or leave empty to skip: ").strip()
             if not search_start_date:
                 break
-            if self.is_valid_date_format(search_start_date):
+            if User.is_valid_date_format(search_start_date):
                 try:
                     search_start_date = datetime.strptime(search_start_date, "%Y-%m-%d")
                     break
                 except ValueError:
-                    pass
+                    print("Could not be read as date!")
+                    continue
             print("Invalid start date format. Please use YYYY-MM-DD.")
 
         # End date input with validation loop
@@ -413,12 +420,13 @@ class User:
             search_end_date = input("Enter end date to search (YYYY-MM-DD) or leave empty to skip: ").strip()
             if not search_end_date:
                 break
-            if self.is_valid_date_format(search_end_date):
+            if User.is_valid_date_format(search_end_date):
                 try:
                     search_end_date = datetime.strptime(search_end_date, "%Y-%m-%d")
                     break
                 except ValueError:
-                    pass  # fallback to show error message below
+                    print("Could not be read as date!")
+                    continue
             print("Invalid end date format. Please use YYYY-MM-DD.")
 
         filtered_projects = []
@@ -450,6 +458,12 @@ class Project:
         self.__start_date = start_date
         self.__end_date = end_date
         self.__creator_id = creator_id
+
+    def get_start_date(self):
+        return self.__start_date
+
+    def get_end_date(self):
+        return self.__end_date
 
     def insert(self):
         try:
@@ -503,13 +517,7 @@ class Project:
                 break
 
         return list_of_splits
-    
-    def get_start_date(self):
-        return self.__start_date
 
-    def get_end_date(self):
-        return self.__end_date
-    
     def show(self):
         title_parts = Project.__split_string(str(self.__title), 15)
         details_parts = Project.__split_string(str(self.__details), 30)
