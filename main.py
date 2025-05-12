@@ -262,9 +262,14 @@ class User:
             if not filtered_projects:
                 print("No projects match the given date range.")
                 return
-        else:
-            # Show all projects if no filter is applied
+        elif not self.__projects: #if no filter requested and it is found that there are no projects ..
+            print("No projects are there for you")
+            return
+
+        else: #if no filter and there is ..
             filtered_projects = self.__projects
+
+        #now show whatever we got..
         print(
             f"{'ID'.ljust(4)} | {'Title'.ljust(15)} | {'Details'.ljust(30)} | {'Target Amount'.ljust(15)} | {'Start Date'.ljust(10)} | {'End Date'.ljust(10)}"
         )
@@ -281,10 +286,7 @@ class User:
             project_id = int(input("Enter the ID of the project you want to delete: "))
 
             for project in self.__projects:
-                if (
-                    hasattr(project, "_Project__id")
-                    and project._Project__id == project_id
-                ):
+                if project.get_id() == project_id :
                     project.delete()
                     self.__projects.remove(project)
                     print("Project deleted successfully.")
@@ -298,7 +300,7 @@ class User:
     def edit_project(self):
 
         # if you like, you can use the function User.is_valid_date_format() (Asmaa implemented) instead of datetime.strptime(), the function uses regex ensure having the format we discussed (YYYY-MM-DD) and not (YYYY-M-D)
-        # add as many getters and setters in the Project class as you need. For some reason you will find get_start_date() and get_end_date() already there
+        # add as many getters and setters in the Project class as you need. For some reason(s) you will find get_start_date() get_end_date()  get_id() already there
         # ensure the whole function doesnt terminate (return, I guess) whenever end_date > start_date
         # I hope there is nothing else to do b2a
         # thank you and here you get an emoji from me <3 (a heart)
@@ -465,6 +467,9 @@ class Project:
     def get_end_date(self):
         return self.__end_date
 
+    def get_id(self):
+        return self.__id
+
     def insert(self):
         try:
             self.__id = Project.generate_project_id()
@@ -503,6 +508,7 @@ class Project:
         return 1
 
     def delete(self):
+        #implement deletion of the record in the projects.csv that has id == self.__id  (Ahmed hani)
         pass
 
     @staticmethod
@@ -570,9 +576,10 @@ if __name__ == "__main__":
             print("\nWhat would you like to do?")
             print("1. Create a project")
             print("2. View your projects")
-            print("3. Delete a project")
-            print("4. Edit a project")
-            print("5. Logout")
+            print("3. Delete one of your projects")
+            print("4. Edit one of your projects")
+            print("5. View all projects")
+            print("6. Logout")
 
             action = input("Enter your choice: ")
 
@@ -585,6 +592,8 @@ if __name__ == "__main__":
             elif action == "4":
                 user.edit_project()
             elif action == "5":
+                Project.show_projects()
+            elif action == "6":
                 print("Logging out...")
                 break
             else:
