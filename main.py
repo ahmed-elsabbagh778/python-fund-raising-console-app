@@ -550,6 +550,37 @@ class Project:
                 f"{(end_parts[i] if i < len(end_parts) else '').ljust(10)}"
             )
 
+    @staticmethod
+    def show_projects():
+        if not os.path.exists("projects.csv"):
+            print("Someone deleted the projects.csv >:(")
+            return
+
+        df = pd.read_csv("projects.csv")
+        all_projects = []
+
+        for _, row in df.iterrows():
+            project = Project(
+                row["id"],
+                row["title"],
+                row["details"],
+                row["target_amount"],
+                row["start_date"],
+                row["end_date"],
+                row["creator_id"]
+            )
+            all_projects.append(project)
+
+        print(
+            f"{'ID'.ljust(4)} | {'Title'.ljust(15)} | {'Details'.ljust(30)} | {'Target Amount'.ljust(15)} | {'Start Date'.ljust(10)} | {'End Date'.ljust(10)}"
+        )
+        print("-" * 100)
+
+        for project in all_projects:
+            project.show()
+
+
+
 
 
 if __name__ == "__main__":
