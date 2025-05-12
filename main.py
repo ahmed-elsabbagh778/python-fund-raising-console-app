@@ -508,8 +508,22 @@ class Project:
         return 1
 
     def delete(self):
-        #implement deletion of the record in the projects.csv that has id == self.__id  (Ahmed hani)
-        pass
+        file_path = "projects.csv"
+
+        if not os.path.exists(file_path):
+            print("projects.csv file not found.")
+            return
+
+        try:
+            df = pd.read_csv(file_path)
+            df = df[df["id"] != self.__id]
+            df.to_csv(file_path, index=False)
+
+            print(f"Project with ID {self.__id} deleted successfully.")
+
+        except Exception as e:
+            print(f"Error while deleting project: {e}")
+
 
     @staticmethod
     def __split_string(string, size):
