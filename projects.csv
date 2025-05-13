@@ -1,9 +1,11 @@
 id,title,details,target_amount,start_date,end_date,creator_id
-232,ddddda,dffffg,d,ds,da,2
-32,daf,dqq,dv,dfr,dq,2
-231,dddadqwq,dddddddd,adasfda,,,1
-232,AG project,Agriculture details project,5000,4/2/2025,6/4/2025,3
-233,DS project,ds details project,60000,5/2/2025,6/12/2025,3
-234,NW project,nw details project,40000,9/29/2024,5/11/2027,4
-235,GD project,dg detail project,60000,4/12/2026,9/30/2026,4
-236,dsad,asd,12222222222213129381,1999-10-10,3213-10-10,5
+1,School Supplies Drive,Funds to buy school kits for children in Upper Egypt,15000.50,2025-06-01,2025-06-30,1
+2,Food Aid Ramadan,Food packages for low-income families during Ramadan,50000.00,2025-03-10,2025-04-05,2
+3,Medical Camp,Free medical check-ups and medicines in rural areas,25000.00,2025-07-01,2025-07-15,3
+4,Orphanage Support,Renovation and furnishing of an orphanage in Cairo,100000.00,2025-05-20,2025-06-20,4
+5,Women Empowerment Workshops,Workshops to support women with skills training,40000.75,2025-08-01,2025-09-01,5
+6,Tech for Youth,Providing laptops for students in remote villages,75000.00,2025-06-10,2025-07-10,6
+7,Clean Water Project,Installing water filters in poor neighborhoods,30000.00,2025-07-15,2025-08-15,7
+8,Disability Aid Program,Supplying wheelchairs and support tools,45000.00,2025-09-01,2025-09-30,8
+9,Green Cairo,Planting trees and promoting environmental awareness,20000.00,2025-05-25,2025-06-25,9
+10,School Renovation Beni Suef,Fixing public schools and improving infrastructure,90000.00,2025-10-01,2025-11-01,10

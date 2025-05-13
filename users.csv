@@ -1,6 +1,11 @@
 id,first_name,last_name,email,password,phone,username
-1,ahmed,elsabbagh,ahmedelsabbagh@gmail.com,As123456,201067465708,ahmedelsabbagh
-2,dsd,dsds,dasfds@gdf.coom,sadasd21d2d@,1143113410,dsad
-3,Asmaa,Tarek,asmaa@gmail.com,Er303#MA,1062542038,asmaa03
-4,aml,mohamed,aml@gmail.com,aml309#M,1095872346,aml05
-5,Gggg,ggg,ggg@gsfdsgfds.com,p,01143113410,g
+1,Mohamed,Hassan,mohamed.hassan@example.com,Pass1234,01012345678,mhassan
+2,Sara,Adel,sara.adel@example.com,SecurePass1,01123456789,sadel
+3,Ahmed,Samir,ahmed.samir@example.com,MyPass2025,01234567890,asamir
+4,Nour,Youssef,nour.youssef@example.com,Nour@123,01098765432,nyoussef
+5,Khaled,Ali,khaled.ali@example.com,Khaled321,01199887766,kali
+6,Mai,Mostafa,mai.mostafa@example.com,PassMai789,01211223344,mmostafa
+7,Omar,Reda,omar.reda@example.com,Omar!2025,01066778899,oreda
+8,Yasmin,Abdelrahman,yasmin.abdel@example.com,Yasmin99,01155667788,yabdel
+9,Tarek,Nabil,tarek.nabil@example.com,TarekPass12,01233445566,tnabil
+10,Laila,Emad,laila.emad@example.com,Laila@456,01033445566,lemad
