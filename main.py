@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class User:
@@ -333,6 +333,10 @@ class User:
         details_input = input(f"Details [{current_details}]: ")
         new_details = details_input.strip() or current_details
 
+        # Target amount limits
+        MIN_AMOUNT = 1000.0
+        MAX_AMOUNT = 10_000_000.0
+
         # Target amount
         while True:
             current_target = project._Project__target_amount
@@ -342,32 +346,49 @@ class User:
                 break
             try:
                 new_target_amount = float(target_input)
-                break
+                if new_target_amount < MIN_AMOUNT:
+                    print(f"Amount must be at least {MIN_AMOUNT:,.0f} EGP.")
+                elif new_target_amount > MAX_AMOUNT:
+                    print(f"Amount must not exceed {MAX_AMOUNT:,.0f} EGP.")
+                else:
+                    break
             except ValueError:
                 print("Invalid number. Please enter a numeric value.")
 
-        # Date
+        # Set the date range
+        MIN_DATE = datetime.today().date()
+        MAX_DATE = (
+            datetime.today() + timedelta(days=5 * 365)
+        ).date()  # 5 years from today
+
         def prompt_for_date(prompt_text, current_value):
-            current_date = datetime.strptime(current_value, "%Y-%m-%d").strftime("%F")
+            current_date = datetime.strptime(current_value, "%Y-%m-%d").date()
             while True:
-                date_input = input(f"{prompt_text} [{current_date}]: ").strip()
+                date_input = input(
+                    f"{prompt_text} [{current_date.isoformat()}]: "
+                ).strip()
                 if not date_input:
-                    return current_date
+                    return current_date.isoformat()
                 try:
-                    return datetime.strptime(date_input, "%Y-%m-%d").strftime("%F")
+                    user_date = datetime.strptime(date_input, "%Y-%m-%d").date()
+                    if user_date < MIN_DATE:
+                        print(f"Date cannot be before today ({MIN_DATE.isoformat()})")
+                    elif user_date > MAX_DATE:
+                        print(
+                            f"Date cannot be more than 5 years from now ({MAX_DATE.isoformat()})"
+                        )
+                    else:
+                        return user_date.isoformat()
                 except ValueError:
                     print("Invalid format. Use YYYY-MM-DD.")
 
         while True:
-            # Start date
             current_start = project._Project__start_date
             new_start_date = prompt_for_date("Start date", current_start)
 
-            # End date
             current_end = project._Project__end_date
             new_end_date = prompt_for_date("End date", current_end)
 
-            # Ensure end > start
             if new_end_date > new_start_date:
                 break
             else:
