@@ -103,10 +103,8 @@ class User:
             else:
                 break
 
-        id = User.__generate_user_id()
-
         user = User(
-            id,
+            User.generate_user_id(),
             inputFirstName,
             inputLastName,
             inputUsername,
@@ -118,7 +116,7 @@ class User:
         return user
 
     @staticmethod
-    def __generate_user_id():
+    def generate_user_id():
         file_path = "users.csv"
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
@@ -183,6 +181,7 @@ class User:
                         project["end_date"],
                         project["creator_id"],
                     )
+                    project_obj._Project__id = project["id"]
                     user_projects.append(project_obj)
 
                 return User(
@@ -196,42 +195,91 @@ class User:
                     user_projects,
                 )
 
-    def insert_project(self):  # create project I mean..
-        # هنا برده هتاخد بيانات المشروع واحدة واحدة من اليوزر
-        # البيانات هي title, details, target_amount, start_date, end_date (ادي بصة على كلاس بروجكت تحت)
-        # هتاخدهم وتعمل بيهم اوبجكت من النوع بروجكت (ادي بصة على كلاس بروجكت تحت)
-        # الاوبجكت دا هياخد منك بقى زيادة عليهم الid بتاع اليوزر اللي مستدعي الفنكشن اللي احنا فيها دي
+    @staticmethod
+    def is_valid_date_format(date_str):
+        # pattern: YYYY-MM-DD only (e.g., 2024-05-11)
+        pattern = r"^\d{4}-\d{2}-\d{2}$"
+        return bool(re.match(pattern, date_str))
 
-        # وغالبا هنضطر كمان نديله id للبروجكت ذات نفسه عشان نتعامل مع البروجكت بعدين .. فبرده هنشوف اخر id في فايل البروجكتس ونزود عليه 1 ونديهوله
-        # بس الid دا خلي اوبجكت البروجكت بقى هو اللي مسؤول يعملها
-        # هي مش ضرورية لحظة انشاء اوبجكت بروجكت .. هي ضرورية لحظة الinsert
-        # project = Project(title, details, target_amount, start_date, end_date, self.__id) فالمهم هنكريت بس كدا دلوقت
+    def insert_project(self):
 
-        # اوبجكت البروجكت فيه فنكشن insert اسمها  .. انسرت دي بقى هي هتحط بيانات الاوبكت دا على فايل البروجكتس .. مالناش دعوة ازاي دلوقت لما نجيلها.. المهم هتستخدمها على طول
-        # project.insert()
-        #  ويدوب بقى زود البروجكت  في الليستة
-        # self.__projects.append(project)
+        print("\n--- Create a New Project ---")
+        title = input("Enter project title: ").strip()
+        details = input("Enter project details: ").strip()
 
-        # خدت بالي اننا لازم نعمل validation على التاريخ ..
-        # برده يفضل يكون الvalidation فنكشن منفصلة __validate_date
-        # وتقعد تعمل لوب لغاية ما تطلع valid وكدا
+        # Validate total amount
+        while True:
+            total_target = input("Enter total target amount: ").strip()
+            if total_target.isdigit():
+                break
+            else:
+                print("Target amount must be a number.")
 
-        pass
+        # Validate start date
+        while True:
+            start_date = input("Enter start date (YYYY-MM-DD): ").strip()
+            if self.is_valid_date_format(start_date):
+                try:
+                    datetime.strptime(start_date, "%Y-%m-%d")
+                    break
+                except ValueError:
+                    print("Invalid date format. Please use YYYY-MM-DD.")
+
+        # Validate end date
+        while True:
+            end_date = input("Enter end date (YYYY-MM-DD): ").strip()
+            if self.is_valid_date_format(end_date):
+                try:
+                    datetime.strptime(end_date, "%Y-%m-%d")
+                    if end_date >= start_date:
+                        break
+                    else:
+                        print("End date must be after start date.")
+                except ValueError:
+                    print("Invalid date format. Please use YYYY-MM-DD.")
+
+        # Save project
+        project = Project(
+            id=Project.generate_project_id(),
+            title=title,
+            details=details,
+            target_amount=total_target,
+            start_date=start_date,
+            end_date=end_date,
+            creator_id=self.__id,
+        )
+        project.insert()
+        self.__projects.append(project)
 
     def show_projects(self):
 
-        # دي هتمسك الليست وتعرضها
-        # لاحظ ان  الليست بتحتوي اوبجكتس من النوع بروجكت  ..
-        # الاحسن نعمل فنكشن جوا البروجكت اسمها show ونلوب ونستخدمها لكل واحد منهم
+        # If user wants to filter by date
+        filter_choice = (
+            input("Do you want to filter projects by date? (y/n): ").strip().lower()
+        )
+        if filter_choice == "y":
+            filtered_projects = self.search_projects_by_date()
+
+            if not filtered_projects:
+                print("No projects match the given date range.")
+                return
+        elif (
+            not self.__projects
+        ):  # if no filter requested and it is found that there are no projects ..
+            print("No projects are there for you")
+            return
+
+        else:  # if no filter and there is ..
+            filtered_projects = self.__projects
+
+        # now show whatever we got..
         print(
             f"{'ID'.ljust(4)} | {'Title'.ljust(15)} | {'Details'.ljust(30)} | {'Target Amount'.ljust(15)} | {'Start Date'.ljust(10)} | {'End Date'.ljust(10)}"
         )
         print("-" * 100)
 
-        for project in self.__projects:
+        for project in filtered_projects:
             project.show()
-
-        pass
 
     def delete_project(self):
         if not self.__projects:
@@ -241,10 +289,7 @@ class User:
             project_id = int(input("Enter the ID of the project you want to delete: "))
 
             for project in self.__projects:
-                if (
-                    hasattr(project, "_Project__id")
-                    and project._Project__id == project_id
-                ):
+                if project.get_id() == project_id:
                     project.delete()
                     self.__projects.remove(project)
                     print("Project deleted successfully.")
@@ -328,10 +373,6 @@ class User:
             else:
                 print("Error: End date must be after start date. Please try again.")
 
-        # Update the project
-        project._Project__start_date = new_start_date
-        project._Project__end_date = new_end_date
-
         # Update CSV on disk
         projects_df = pd.read_csv("projects.csv")
         projects_df.loc[
@@ -355,6 +396,54 @@ class User:
 
         print("Project updated successfully.")
 
+    # search by date
+    def search_projects_by_date(self):
+        while True:
+            search_start_date = input(
+                "Enter start date to search (YYYY-MM-DD) or leave empty to skip: "
+            ).strip()
+            if not search_start_date:
+                break
+            if User.is_valid_date_format(search_start_date):
+                try:
+                    search_start_date = datetime.strptime(search_start_date, "%Y-%m-%d")
+                    break
+                except ValueError:
+                    print("Could not be read as date!")
+                    continue
+            print("Invalid start date format. Please use YYYY-MM-DD.")
+
+        # End date input with validation loop
+        while True:
+            search_end_date = input(
+                "Enter end date to search (YYYY-MM-DD) or leave empty to skip: "
+            ).strip()
+            if not search_end_date:
+                break
+            if User.is_valid_date_format(search_end_date):
+                try:
+                    search_end_date = datetime.strptime(search_end_date, "%Y-%m-%d")
+                    break
+                except ValueError:
+                    print("Could not be read as date!")
+                    continue
+            print("Invalid end date format. Please use YYYY-MM-DD.")
+
+        filtered_projects = []
+
+        for project in self.__projects:
+            project_start_date = datetime.strptime(project.get_start_date(), "%Y-%m-%d")
+            project_end_date = datetime.strptime(project.get_end_date(), "%Y-%m-%d")
+
+            if search_start_date and project_start_date < search_start_date:
+                continue
+            if search_end_date and project_end_date > search_end_date:
+                continue
+
+            filtered_projects.append(project)
+
+        return filtered_projects
+
 
 # Project class to handle project creation, editing, deletion, and viewing
 class Project:
@@ -369,13 +458,18 @@ class Project:
         self.__end_date = end_date
         self.__creator_id = creator_id
 
-    def insert(self):
-        # دي هتجيب id بس الاول وبعدين تحط البيانات كلها بقى بالid بكله في الفايل
-        # يعني قصدي هتعمل self.__id = id عشان هنحتاجه طبعا
-        # وبعدين تحط كل البيانات دي كبروجكت في فايل البروجكتس مرة واحدة
+    def get_start_date(self):
+        return self.__start_date
 
+    def get_end_date(self):
+        return self.__end_date
+
+    def get_id(self):
+        return self.__id
+
+    def insert(self):
         try:
-            self.__id = Project.__generate_project_id()
+            self.__id = Project.generate_project_id()
             new_project = {
                 "id": self.__id,
                 "title": self.__title,
@@ -402,10 +496,7 @@ class Project:
             print(f"Error inserting project: {e}")
 
     @staticmethod
-    def __generate_project_id():
-        # خلي جزء جلب اخر id + 1 دا هنا
-        # واستخدمه في الفنكشن اللي فوق .. نضافة كود مش اكتر
-
+    def generate_project_id():
         file_path = "projects.csv"
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
@@ -414,9 +505,21 @@ class Project:
         return 1
 
     def delete(self):
-        # هنا هتاخد الid وتروح تشيل الريكورد بتاعه من الفايل بس وخلاص
-        # .. لقطة حلوة انك تdestruct الاوجكت بعدها
-        pass
+        file_path = "projects.csv"
+
+        if not os.path.exists(file_path):
+            print("projects.csv file not found.")
+            return
+
+        try:
+            df = pd.read_csv(file_path)
+            df = df[df["id"] != self.__id]
+            df.to_csv(file_path, index=False)
+
+            print(f"Project with ID {self.__id} deleted successfully.")
+
+        except Exception as e:
+            print(f"Error while deleting project: {e}")
 
     @staticmethod
     def __split_string(string, size):
@@ -457,7 +560,34 @@ class Project:
                 f"{(end_parts[i] if i < len(end_parts) else '').ljust(10)}"
             )
 
-    # لو عايز تعمل edit معقد .. غالبا هتحتاج setters
+    @staticmethod
+    def show_projects():
+        if not os.path.exists("projects.csv"):
+            print("Someone deleted the projects.csv >:(")
+            return
+
+        df = pd.read_csv("projects.csv")
+        all_projects = []
+
+        for _, row in df.iterrows():
+            project = Project(
+                row["id"],
+                row["title"],
+                row["details"],
+                row["target_amount"],
+                row["start_date"],
+                row["end_date"],
+                row["creator_id"],
+            )
+            all_projects.append(project)
+
+        print(
+            f"{'ID'.ljust(4)} | {'Title'.ljust(15)} | {'Details'.ljust(30)} | {'Target Amount'.ljust(15)} | {'Start Date'.ljust(10)} | {'End Date'.ljust(10)}"
+        )
+        print("-" * 100)
+
+        for project in all_projects:
+            project.show()
 
 
 if __name__ == "__main__":
@@ -484,9 +614,10 @@ if __name__ == "__main__":
             print("\nWhat would you like to do?")
             print("1. Create a project")
             print("2. View your projects")
-            print("3. Delete a project")
-            print("4. Edit a project")
-            print("5. Logout")
+            print("3. Delete one of your projects")
+            print("4. Edit one of your projects")
+            print("5. View all projects")
+            print("6. Logout")
 
             action = input("Enter your choice: ")
 
@@ -499,6 +630,8 @@ if __name__ == "__main__":
             elif action == "4":
                 user.edit_project()
             elif action == "5":
+                Project.show_projects()
+            elif action == "6":
                 print("Logging out...")
                 break
             else:
