@@ -255,104 +255,104 @@ class User:
         except ValueError:
             print("Invalid input. Please enter a numeric ID.")
 
-        def edit_project(self):
-            if not self.__projects:
-                print("You have no projects to edit.")
-                return
+    def edit_project(self):
+        if not self.__projects:
+            print("You have no projects to edit.")
+            return
 
-            self.show_projects()
+        self.show_projects()
+        try:
+            project_id = int(input("Enter the ID of the project to edit: "))
+        except ValueError:
+            print("Please enter a valid numeric ID.")
+            return
+
+        # Finding the chosen project by ID
+        project = next(
+            (p for p in self.__projects if p._Project__id == project_id), None
+        )
+        if project is None:
+            print("Project not found.")
+            return
+
+        print("Leave any prompt blank to keep its current value.\n")
+
+        # Either you'll put the new values or it'll keep the old ones
+        # Title
+        current_title = project._Project__title
+        title_input = input(f"Title [{current_title}]: ")
+        new_title = title_input.strip() or current_title
+
+        # Details
+        current_details = project._Project__details
+        details_input = input(f"Details [{current_details}]: ")
+        new_details = details_input.strip() or current_details
+
+        # Target amount
+        while True:
+            current_target = project._Project__target_amount
+            target_input = input(f"Target amount (EGP) [{current_target}]: ").strip()
+            if not target_input:
+                new_target_amount = current_target
+                break
             try:
-                project_id = int(input("Enter the ID of the project to edit: "))
+                new_target_amount = float(target_input)
+                break
             except ValueError:
-                print("Please enter a valid numeric ID.")
-                return
+                print("Invalid number. Please enter a numeric value.")
 
-            # Finding the chosen project by ID
-            project = next(
-                (p for p in self.__projects if p._Project__id == project_id), None
-            )
-            if project is None:
-                print("Project not found.")
-                return
-
-            print("Leave any prompt blank to keep its current value.\n")
-
-            # Either you'll put the new values or it'll keep the old ones
-            # Title
-            current_title = project._Project__title
-            title_input = input(f"Title [{current_title}]: ")
-            new_title = title_input.strip() or current_title
-
-            # Details
-            current_details = project._Project__details
-            details_input = input(f"Details [{current_details}]: ")
-            new_details = details_input.strip() or current_details
-
-            # Target amount
+        # Date
+        def prompt_for_date(prompt_text, current_value):
+            current_dt = datetime.strptime(current_value, "%Y-%m-%d")
+            current_str = current_dt.strftime("%Y-%m-%d")
             while True:
-                current_target = project._Project__target_amount
-                target_input = input(
-                    f"Target amount (EGP) [{current_target}]: "
-                ).strip()
-                if not target_input:
-                    new_target_amount = current_target
-                    break
+                date_input = input(f"{prompt_text} [{current_str}]: ").strip()
+                if not date_input:
+                    return current_str
                 try:
-                    new_target_amount = float(target_input)
-                    break
+                    # validate format
+                    datetime.strptime(date_input, "%Y-%m-%d")
+                    return date_input
                 except ValueError:
-                    print("Invalid number. Please enter a numeric value.")
+                    print("Invalid format. Use YYYY-MM-DD.")
 
-            # Date
-            def prompt_for_date(prompt_text, current_value):
-                while True:
-                    date_input = input(f"{prompt_text} [{current_value}]: ").strip()
-                    if not date_input:
-                        return current_value
-                    try:
-                        # validate format
-                        datetime.strptime(date_input, "%Y-%m-%d")
-                        return date_input
-                    except ValueError:
-                        print("Invalid format. Use YYYY-MM-DD.")
+        # Start date
+        current_start = project._Project__start_date
+        new_start_date = prompt_for_date("Start date", current_start)
 
-            # Start date
-            current_start = project._Project__start_date
-            new_start_date = prompt_for_date("Start date", current_start)
+        # End date
+        current_end = project._Project__end_date
+        new_end_date = prompt_for_date("End date", current_end)
 
-            # End date
-            current_end = project._Project__end_date
-            new_end_date = prompt_for_date("End date", current_end)
+        # Ensure end > start
+        start_dt = datetime.strptime(new_start_date, "%Y-%m-%d")
+        end_dt = datetime.strptime(new_end_date, "%Y-%m-%d")
+        if end_dt <= start_dt:
+            print("Error: End date must be after start date.")
+            return
 
-            # Ensure end > start
-            start_dt = datetime.strptime(new_start_date, "%Y-%m-%d")
-            end_dt = datetime.strptime(new_end_date, "%Y-%m-%d")
-            if end_dt <= start_dt:
-                print("Error: End date must be after start date.")
-                return
+        # Update CSV on disk
+        projects_df = pd.read_csv("projects.csv")
+        projects_df.loc[
+            projects_df["id"] == project_id,
+            ["title", "details", "target_amount", "start_date", "end_date"],
+        ] = [
+            new_title,
+            new_details,
+            new_target_amount,
+            new_start_date,
+            new_end_date,
+        ]
+        projects_df.to_csv("projects.csv", index=False)
 
-            # Update CSV on disk
-            projects_df = pd.read_csv("projects.csv")
-            projects_df.loc[
-                projects_df["id"] == project_id,
-                ["title", "details", "target_amount", "start_date", "end_date"],
-            ] = [
-                new_title,
-                new_details,
-                new_target_amount,
-                new_start_date,
-                new_end_date,
-            ]
-            projects_df.to_csv("projects.csv", index=False)
+        # Update the object as if the user wanna display it here, it has to show the new values, not the old ones.
+        project._Project__title = new_title
+        project._Project__details = new_details
+        project._Project__target_amount = new_target_amount
+        project._Project__start_date = new_start_date
+        project._Project__end_date = new_end_date
 
-            # Update the object as if the user wanna display it here, it has to show the new values, not the old ones.
-            project._Project__title = new_title
-            project._Project__details = new_details
-            project._Project__target_amount = new_target_amount
-            project._Project__start_date = new_start_date
-            project._Project__end_date = new_end_date
-
-            print("Project updated successfully.")
+        print("Project updated successfully.")
 
 
 # Project class to handle project creation, editing, deletion, and viewing
