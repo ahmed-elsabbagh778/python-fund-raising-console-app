@@ -203,11 +203,18 @@ class User:
 
     def insert_project(self):
 
-        print("\n--- Create a New Project ---")
-        title = input("Enter project title: ").strip()
-        details = input("Enter project details: ").strip()
+        while True:
+            title = input("Enter project title: ").strip()
+            if title and not title.isdigit():
+                break
+            print("Invalid input. Title cannot be empty or digits only.")
 
-        # Validate total amount
+        while True:
+            details = input("Enter project details: ").strip()
+            if details and not details.isdigit():
+                break
+            print("Invalid input. Details cannot be empty or digits only.")
+
         while True:
             total_target = input("Enter total target amount: ").strip()
             if total_target.isdigit():
@@ -215,20 +222,19 @@ class User:
             else:
                 print("Target amount must be a number.")
 
-        # Validate start date
         while True:
             start_date = input("Enter start date (YYYY-MM-DD): ").strip()
-            if self.is_valid_date_format(start_date):
+            if User.is_valid_date_format(start_date):
                 try:
                     datetime.strptime(start_date, "%Y-%m-%d")
                     break
                 except ValueError:
                     print("Invalid date format. Please use YYYY-MM-DD.")
+            else: print("Invalid date format. Please use YYYY-MM-DD.")
 
-        # Validate end date
         while True:
             end_date = input("Enter end date (YYYY-MM-DD): ").strip()
-            if self.is_valid_date_format(end_date):
+            if User.is_valid_date_format(end_date):
                 try:
                     datetime.strptime(end_date, "%Y-%m-%d")
                     if end_date >= start_date:
@@ -237,6 +243,7 @@ class User:
                         print("End date must be after start date.")
                 except ValueError:
                     print("Invalid date format. Please use YYYY-MM-DD.")
+            else: print("Invalid date format. Please use YYYY-MM-DD.")
 
         # Save project
         project = Project(
