@@ -303,33 +303,34 @@ class User:
 
         # Date
         def prompt_for_date(prompt_text, current_value):
-            current_dt = datetime.strptime(current_value, "%Y-%m-%d")
-            current_str = current_dt.strftime("%Y-%m-%d")
+            current_date = datetime.strptime(current_value, "%Y-%m-%d").strftime("%F")
             while True:
-                date_input = input(f"{prompt_text} [{current_str}]: ").strip()
+                date_input = input(f"{prompt_text} [{current_date}]: ").strip()
                 if not date_input:
-                    return current_str
+                    return current_date
                 try:
-                    # validate format
-                    datetime.strptime(date_input, "%Y-%m-%d")
-                    return date_input
+                    return datetime.strptime(date_input, "%Y-%m-%d").strftime("%F")
                 except ValueError:
                     print("Invalid format. Use YYYY-MM-DD.")
 
-        # Start date
-        current_start = project._Project__start_date
-        new_start_date = prompt_for_date("Start date", current_start)
+        while True:
+            # Start date
+            current_start = project._Project__start_date
+            new_start_date = prompt_for_date("Start date", current_start)
 
-        # End date
-        current_end = project._Project__end_date
-        new_end_date = prompt_for_date("End date", current_end)
+            # End date
+            current_end = project._Project__end_date
+            new_end_date = prompt_for_date("End date", current_end)
 
-        # Ensure end > start
-        start_dt = datetime.strptime(new_start_date, "%Y-%m-%d")
-        end_dt = datetime.strptime(new_end_date, "%Y-%m-%d")
-        if end_dt <= start_dt:
-            print("Error: End date must be after start date.")
-            return
+            # Ensure end > start
+            if new_end_date > new_start_date:
+                break
+            else:
+                print("Error: End date must be after start date. Please try again.")
+
+        # Update the project
+        project._Project__start_date = new_start_date
+        project._Project__end_date = new_end_date
 
         # Update CSV on disk
         projects_df = pd.read_csv("projects.csv")
